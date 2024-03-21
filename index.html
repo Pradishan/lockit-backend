@@ -174,7 +174,7 @@
             const deviceID = document.getElementById("deviceID").value;
 
             // AJAX request to get device details
-            fetch(`http://localhost:5000/api/devices/${deviceID}`)
+            fetch(`/api/devices/${deviceID}`)
                 .then(response => response.json())
                 .then(data => {
                     // Hide loading spinner
@@ -201,7 +201,7 @@
                 toggleLoadingSpinner(true);
 
                 // AJAX request to get all devices
-                const response = await fetch("http://localhost:5000/api/devices/allDevices");
+                const response = await fetch("/api/devices/allDevices");
                 const data = await response.json();
 
                 // Hide loading spinner
