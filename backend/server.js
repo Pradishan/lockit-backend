@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from'cors';
 import userRoutes from './routes/userRoutes.js'
+import deviceRoutes from './routes/deviceRouts.js'
 import connectDB from './config/db.js';
 import {notFound, errorHandler} from './middleware/errorMiddleware.js'
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({extended: true}))
 
 // routes
 app.use('/api/users', userRoutes);
+app.use('/api/devices', deviceRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).sendFile('index.html', { root: "./" });

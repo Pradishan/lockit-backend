@@ -121,10 +121,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             user.email = req.body.email || user.email;
             user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
 
-            if (req.body.password) {
-                user.password = req.body.password;
-            }
-
             const updatedUser = await user.save();
 
             res.status(200).json({

@@ -59,7 +59,7 @@
             var deviceID = document.getElementById("deviceID").value;
 
             // AJAX request to get device details
-            fetch(`http://127.0.0.1:5001/lockit-332b1/us-central1/app/device/${deviceID}`)
+            fetch(`http://localhost:5000/lockit-332b1/us-central1/app/device/${deviceID}`)
                 .then(response => response.json())
                 .then(data => {
                     // Hide loading spinner
@@ -84,7 +84,7 @@
             toggleLoadingSpinner(true); // Show loading spinner
 
             // AJAX request to get all devices
-            fetch("http://127.0.0.1:5001/lockit-332b1/us-central1/app/all-devices")
+            fetch("http://localhost:5000/lockit-332b1/us-central1/app/all-devices")
                 .then(response => response.json())
                 .then(data => {
                     // Hide loading spinner
