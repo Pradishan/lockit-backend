@@ -7,6 +7,10 @@ const deviceSchema = mongoose.Schema({
         required: true,
         unique: true
     },
+    ownerID: {
+        type: String,
+        required: true,
+    },
     owner: {
         type: String,
         required: true,

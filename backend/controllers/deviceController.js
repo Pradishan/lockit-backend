@@ -8,11 +8,14 @@ const deviceRegister = asyncHandler(async (req, res) => {
         const {
             deviceID, owner,
         } = req.body;
-        // const userExists = await User.findOne({ email: owner })
+        const userExists = await User.findOne({ email: owner })
+
         // if (!userExists) {
         //     res.status(400).json({ status: false, message: "User does not exist" });
         //     throw new Error('User does not exist')
         // }
+
+        let ownerID = userExists._id;
 
         const deviceExists = await Device.findOne({ deviceID })
         if (deviceExists) {
@@ -21,7 +24,7 @@ const deviceRegister = asyncHandler(async (req, res) => {
         }
 
         const device = await Device.create({
-            deviceID, owner
+            deviceID, ownerID, owner,
         });
 
         if (device) {
@@ -107,7 +110,7 @@ const getDeviceByOwner = asyncHandler(async (req, res) => {
 
 const getAllDevices = asyncHandler(async (req, res) => {
     try {
-        const devices = await Device.find({});
+        const devices = await Device.find({}, { ownerID: 0 });
         res.status(200).json(devices);
     } catch (err) {
         console.error('Failed to fetch devices from MongoDB:', err);
@@ -165,4 +168,135 @@ const deleteDevice = asyncHandler(async (req, res) => {
     }
 })
 
-export { deviceRegister,getDevice,getAllDevices,deleteDevice,updateDevice,getDeviceByOwner }
+const lockDevice = asyncHandler(async (req, res) => {
+    try {
+        let deviceID = req.params.deviceID
+        const device = await Device.findOne({ deviceID });
+        if (device) {
+
+            if (!device.active) {
+                return res.status(400).send({ status: false, message: `DEVICE ${req.params.deviceID} is blocked.` });
+            }
+
+            if (device.status) {
+                return res.status(400).send({ status: false, message: `DEVICE ${req.params.deviceID} is alrady locked.` });
+            }
+
+            if (device.ownerID === req.body.ownerID) {
+
+                device.status = true;
+                const updatedDevice = await device.save();
+
+                return res.status(200).send({ status: true, message: `DEVICE ${req.params.deviceID} is locked` })
+
+            } else {
+                return res.status(400).send({ status: false, message: `unautharized activity` });
+            }
+
+        } else {
+            res.status(404).json({ status: false, message: 'device not found' });
+            throw new Error('device not found');
+        }
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error });
+    }
+})
+
+const unlockDevice = asyncHandler(async (req, res) => {
+    try {
+        let deviceID = req.params.deviceID
+        const device = await Device.findOne({ deviceID });
+        if (device) {
+
+            if (!device.active ) {
+                return res.status(400).send({ status: false, message: `DEVICE ${req.params.deviceID} is blocked. Cannot unlock.` });
+            }
+            if (!device.status) {
+                return res.status(400).send({ status: false, message: `DEVICE ${req.params.deviceID} is already unlocked.` });
+            }
+
+            if (device.ownerID === req.body.ownerID) {
+
+                device.status = false;
+                const updatedDevice = await device.save();
+
+                return res.status(200).send({ status: true, message: `DEVICE ${req.params.deviceID} is unlocked` })
+
+            } else {
+                return res.status(400).send({ status: false, message: `unautharized activity` });
+            }
+
+        } else {
+            res.status(404).json({ status: false, message: 'device not found' });
+            throw new Error('device not found');
+        }
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error });
+    }
+})
+
+const blockDevice = asyncHandler(async (req, res) => {
+    try {
+        let deviceID = req.params.deviceID
+        const device = await Device.findOne({ deviceID });
+        if (device) {
+
+            if (!device.active ) {
+                return res.status(400).send({ status: false, message: `DEVICE ${req.params.deviceID} is already blocked.` });
+            }
+
+            if (device.ownerID === req.body.ownerID) {
+
+                device.active = false;
+                device.status = false;
+
+                const updatedDevice = await device.save();
+
+                return res.status(200).send({ status: true, message: `DEVICE ${req.params.deviceID} is blocked` })
+
+            } else {
+                return res.status(400).send({ status: false, message: `unautharized activity` });
+            }
+
+        } else {
+            res.status(404).json({ status: false, message: 'device not found' });
+            throw new Error('device not found');
+        }
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error });
+    }
+})
+
+const unblockDevice = asyncHandler(async (req, res) => {
+    try {
+        let deviceID = req.params.deviceID
+        const device = await Device.findOne({ deviceID });
+        if (device) {
+
+            if (device.active ) {
+                return res.status(400).send({ status: false, message: `DEVICE ${req.params.deviceID} is already unblocked.` });
+            }
+
+            if (device.ownerID === req.body.ownerID) {
+
+                device.active = true;
+                device.status = true;
+
+                const updatedDevice = await device.save();
+
+                return res.status(200).send({ status: true, message: `DEVICE ${req.params.deviceID} is unblocked` })
+
+            } else {
+                return res.status(400).send({ status: false, message: `unautharized activity` });
+            }
+
+        } else {
+            res.status(404).json({ status: false, message: 'device not found' });
+            throw new Error('device not found');
+        }
+    } catch (error) {
+        return res.status(500).json({ status: false, message: error });
+    }
+})
+
+export { deviceRegister, getDevice, getAllDevices, deleteDevice, updateDevice, getDeviceByOwner, lockDevice, unlockDevice, blockDevice, unblockDevice }
