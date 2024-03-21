@@ -7,7 +7,7 @@ const router = express.Router();
 router.route('/register').post(deviceRegister);
 router.route('/allDevices').get(getAllDevices);
 router.route('/:deviceID').get(getDevice).put(updateDevice);
-router.route('/:owner/devices').get(getDeviceByOwner)
+router.route('/:owner/devices').get(getDeviceByOwner);
 router.route('/:deviceID/delete').delete(deleteDevice);
 router.route('/:deviceID/lock').post(lockDevice);
 router.route('/:deviceID/unlock').post(unlockDevice);

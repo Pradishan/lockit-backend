@@ -7,7 +7,8 @@
     <title>Lockit API</title>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Fym0f6bWskNNPsw3Lnh2i2lkewcOM8ko7TKAxTaq9XTWhF/4hxlX2Av7w6R6Aiwj" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Fym0f6bWskNNPsw3Lnh2i2lkewcOM8ko7TKAxTaq9XTWhF/4hxlX2Av7w6R6Aiwj" crossorigin="anonymous">
 
     <style>
         /* Custom styles */
@@ -48,7 +49,8 @@
             margin-bottom: 20px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 8px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -112,27 +114,64 @@
     </div>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-NVXHZrjFCxEbRRVyJ6QVbtco8TXRf4J0RxjJ0mO4VHQqhZ+84KLHv7fv6iR99wEZ" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-NVXHZrjFCxEbRRVyJ6QVbtco8TXRf4J0RxjJ0mO4VHQqhZ+84KLHv7fv6iR99wEZ"
+        crossorigin="anonymous"></script>
 
     <script>
+        // WebSocket connection
+        const socket = new WebSocket('ws://localhost:5000');
+
+        socket.onopen = function (event) {
+            console.log('WebSocket connection established.');
+        };
+
+        socket.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            if (message.type === 'deviceUpdate') {
+                // Update the device list
+                updateDeviceList(message.devices);
+            }
+        };
+
+        function updateDeviceList(devices) {
+            const devicesList = document.getElementById("devicesList");
+            devicesList.innerHTML = "";
+            devices.forEach(device => {
+                const listItem = createDeviceListItem(device);
+                devicesList.appendChild(listItem);
+            });
+        }
+
+        // Function to create HTML element for a device item
+        function createDeviceListItem(device) {
+            const listItem = document.createElement("tr");
+            listItem.innerHTML = `<td><p class="deviceInfo">${device.deviceID}</p></td>
+                  <td><p class="deviceInfo">${device.owner}</p></td>
+                  <td><p class="deviceInfo">${isLocked(device.status)}</p></td>
+                  <td><p class="deviceInfo">${indicator(device.active)}</p></td>`;
+            return listItem;
+        }
+
         // Function to show/hide loading spinner
         function toggleLoadingSpinner(show) {
-            var spinner = document.getElementById("loadingSpinner");
-            spinner.style.display = show ? "block" : "none";
+            const spinner = document.getElementById("loadingSpinner");
+            spinner.style
+            .display = show ? "block" : "none";
         }
 
         function indicator(data) {
-            return `${data ? '<span class="indicatorActive">&#x25cf;</span>' : '<span class="indicatorInactive">&#x25cf;</span>'}`
+            return `${data ? '<span class="indicatorActive" style = "color:green">active &#x25cf;</span>' : '<span class="indicatorInactive" style = "color:red">inactive &#x25cf;</span>'}`
         }
 
         function isLocked(data) {
-            return `${data ? '<span class="statusLocked">Locked</span>' : '<span class="statusUnlocked">Unlocked</span>'}`
+            return `${data ? '<span class="statusLocked" style = "color:green">Locked</span>' : '<span class="statusUnlocked" style = "color:red">Unlocked</span>'}`
         }
 
         // Function to get a specific device
         function getDevice() {
             toggleLoadingSpinner(true); // Show loading spinner
-            var deviceID = document.getElementById("deviceID").value;
+            const deviceID = document.getElementById("deviceID").value;
 
             // AJAX request to get device details
             fetch(`http://localhost:5000/api/devices/${deviceID}`)
@@ -169,13 +208,7 @@
                 toggleLoadingSpinner(false);
 
                 // Display list of devices
-                const devicesList = document.getElementById("devicesList");
-                devicesList.innerHTML = "";
-
-                data.forEach(device => {
-                    const listItem = createDeviceListItem(device);
-                    devicesList.appendChild(listItem);
-                });
+                updateDeviceList(data);
             } catch (error) {
                 console.error('Error fetching devices:', error);
                 // Hide loading spinner in case of an error
@@ -183,17 +216,6 @@
                 // Display error message to the user
                 showError("Failed to fetch devices. Please try again later.");
             }
-        }
-
-        // Function to create HTML element for a device item
-        function createDeviceListItem(device) {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `<tr><td><p class="deviceInfo">ID: ${device.deviceID}</p></td>
-                                  <td><p class="deviceInfo">Owner: ${device.owner}</p></td>
-                                  <td><p class="deviceInfo">Status: ${isLocked(device.status)}</p></td>
-                                  <td><p class="deviceInfo">Active: ${indicator(device.active)}</p></td></tr>`;
-            listItem.classList.add("deviceItem");
-            return listItem;
         }
 
         // Function to display error message
@@ -206,8 +228,6 @@
         // Initial load - get all devices
         getAllDevices();
     </script>
-
-
 </body>
 
 </html>
