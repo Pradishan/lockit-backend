@@ -22,7 +22,6 @@ Open [http://localhost:5000/](http://localhost:5000/) to view it in your browser
 #### Register a new user
 
 (POST)
-@post
 ### `http://localhost:5000/api/users/register`
 
 Sample Request Body
